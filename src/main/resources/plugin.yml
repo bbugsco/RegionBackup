@@ -1,0 +1,4 @@
+name: RegionBackup
+version: '${project.version}'
+main: com.github.bbugsco.regionbackup.RegionBackup
+api-version: '1.20'
