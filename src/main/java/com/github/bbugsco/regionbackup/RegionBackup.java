@@ -15,7 +15,7 @@ public final class RegionBackup extends JavaPlugin {
 
     @Override
     public void onEnable() {
-	    backupTasks = new RegionBackupTasks();
+	    backupTasks = new RegionBackupTasks(this);
     }
 
     @Override

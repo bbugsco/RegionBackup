@@ -2,11 +2,15 @@ package com.github.bbugsco.regionbackup;
 
 import java.awt.*;
 import java.util.Objects;
+import java.util.UUID;
 
 public class Region extends Point {
 
-	public Region(int x, int y) {
+	private final UUID worldID;
+
+	public Region(int x, int y, UUID worldID) {
 		super(x, y);
+		this.worldID = worldID;
 	}
 
 	@Override
@@ -18,12 +22,12 @@ public class Region extends Point {
 			return false;
 		}
 		Region compareTo = (Region) obj;
-		return this.x == compareTo.x && this.y == compareTo.y;
+		return this.x == compareTo.x && this.y == compareTo.y && worldID == compareTo.worldID;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(x, y);
+		return Objects.hash(x, y, worldID);
 	}
 
 }

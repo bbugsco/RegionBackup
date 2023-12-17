@@ -5,9 +5,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.sql.Time;
+
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -18,13 +16,15 @@ import java.util.concurrent.TimeUnit;
 
 public class RegionBackupTasks {
 
+	private final RegionBackup plugin;
+
 	private final ScheduledExecutorService scheduler;
 	private ArrayList<Region> activeRegions;
-	// private String PATH = "home/bbugsco/server/backup"
-	private final String PATH = "/home/benhi/serverBackup";
 	private long nextHour;
 
-	public RegionBackupTasks() {
+	public RegionBackupTasks(RegionBackup plugin) {
+		this.plugin = plugin;
+
 		scheduler = Executors.newScheduledThreadPool(1);
 		activeRegions = new ArrayList<>();
 
@@ -53,20 +53,25 @@ public class RegionBackupTasks {
 	}
 
 	private void backupRegions() {
+		// private String PATH = "home/bbugsco/server/backup"
+		String PATH = "/home/benhi/serverBackup";
+
 		Timestamp nextHour = new Timestamp(this.nextHour);
 		String formattedString = formatTimestamp(nextHour);
+
 		File outputDir = new File(PATH + "/" + formattedString);
 		boolean dirCreated = outputDir.mkdirs();
-		if (!dirCreated) System.out.println("Failed to create directory for backup: does the directory already exist? " + outputDir.getAbsolutePath());
+		if (!dirCreated) plugin.getLogger().warning("Failed to create directory for backup: does the directory already exist? " + outputDir.getAbsolutePath());
 
-
+		// TODO here
 
 		this.activeRegions = new ArrayList<>();
 		this.nextHour = getNextHourMillis();
 	}
 
 	private Region getRegion(Location location) {
-		return new Region(location.getBlockX() >> 9, location.getBlockZ() >> 9);
+		if (location.getWorld() == null) return new Region(0, 0, Bukkit.getWorlds().get(0).getUID());
+		return new Region(location.getBlockX() >> 9, location.getBlockZ() >> 9, location.getWorld().getUID());
 	}
 
 	private static long getNextHourMillis() {
@@ -75,13 +80,11 @@ public class RegionBackupTasks {
 		return currentHourMillis + 3_600_000;
 	}
 
-
-	public static String formatTimestamp(Timestamp timestamp) {
+	private static String formatTimestamp(Timestamp timestamp) {
 		if (timestamp == null) return null;
 		Date date = new Date(timestamp.getTime());
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 		return dateFormat.format(date);
 	}
-
 
 }
