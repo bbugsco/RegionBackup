@@ -1,6 +1,7 @@
 package com.github.bbugsco.regionbackup;
 
 import org.apache.commons.io.FileUtils;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -38,7 +39,7 @@ public class RegionBackupTasks {
 		this.scheduler.scheduleAtFixedRate(this::backupRegions, initialDelay, 1, TimeUnit.HOURS);
 
 		// 10-second delay check player location for loaded regions
-		this.scheduler.scheduleAtFixedRate(this::updateActiveRegions, 0, 10, TimeUnit.SECONDS);
+		this.scheduler.scheduleAtFixedRate(this::updateActiveRegions, 0, plugin.getConfig().getInt("check_active_regions_interval"), TimeUnit.SECONDS);
 	}
 
 	public void shutdown() {
@@ -54,31 +55,37 @@ public class RegionBackupTasks {
 	}
 
 	public void backupRegions() {
-		String PATH = "home/bbugsco/server/backup";
+		// Root directory of backup folder
+		String backupPath = plugin.getConfig().getString("backup_path");
 
+		// Get Time in format yyyy-MM-dd_HH:mm
 		Timestamp nextHour = new Timestamp(System.currentTimeMillis());
 		String formattedString = formatTimestamp(nextHour);
 
-		File outputDir = new File(PATH + "/" + formattedString);
+		// Create folder with datetime
+		File outputDir = new File(backupPath + "/" + formattedString);
+
+		// Check if directory was created
 		boolean dirCreated = outputDir.mkdirs();
 		if (!dirCreated) plugin.getLogger().warning("Failed to create directory for backup: does the directory already exist? " + outputDir.getAbsolutePath());
 
+		// Save worlds to folder
 		for (World world : Bukkit.getWorlds()) {
 			world.save();
 		}
 
+		// Copy each region to the backup folder
 		for (Region region : activeRegions) {
 			String regionName =  "r." + region.x + "." + region.y + ".mca";
 
 			File source = new File(region.worldName + "/region/" + regionName);
-			File destination = new File(PATH + "/" + region.worldName + "/" + regionName);
-			System.out.println("Source" + source.getAbsolutePath());
-			System.out.println("Dest" + destination.getAbsolutePath());
+			File destination = new File(outputDir + "/" + region.worldName + "/" + regionName);
 
 			try {
 				FileUtils.copyFile(source, destination);
 			} catch (IOException exception) {
-				plugin.getLogger().warning("Error");
+				plugin.getLogger().warning("Error copying file");
+				exception.fillInStackTrace();
 			}
 		}
 
@@ -90,7 +97,6 @@ public class RegionBackupTasks {
 			Region region = getRegion(player.getLocation());
 			if (!this.activeRegions.contains(region)) this.activeRegions.add(region);
 		}
-		System.out.println(activeRegions);
 	}
 
 	private Region getRegion(Location location) {
@@ -107,7 +113,7 @@ public class RegionBackupTasks {
 	private static String formatTimestamp(Timestamp timestamp) {
 		if (timestamp == null) return null;
 		Date date = new Date(timestamp.getTime());
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH:mm");
 		return dateFormat.format(date);
 	}
 

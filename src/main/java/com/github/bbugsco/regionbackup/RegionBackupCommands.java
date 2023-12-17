@@ -20,17 +20,21 @@ public class RegionBackupCommands implements CommandExecutor {
 	public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
 		if (sender.hasPermission("regionbackup.command")) {
 			switch (alias) {
-				case "forcebackup":
+				case "debug_forcebackup":
 					plugin.getBackupTasks().backupRegions();
 					break;
-				case "clearactiveregions":
+				case "debug_clearactiveregions":
 					plugin.getBackupTasks().clearActiveRegions();
 					break;
-				case "showactiveregions":
+				case "debug_showactiveregions":
 					ArrayList<Region> regions = plugin.getBackupTasks().getActiveRegions();
 					for (Region region : regions) {
 						sender.sendMessage(region.toString());
 					}
+					break;
+				case "debug_updateactiveregions":
+					plugin.getBackupTasks().updateActiveRegions();
+					break;
 			}
 		}
 		return true;

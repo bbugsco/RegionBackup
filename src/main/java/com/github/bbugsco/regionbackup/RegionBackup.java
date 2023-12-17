@@ -10,8 +10,11 @@ public final class RegionBackup extends JavaPlugin {
 
     @Override
     public void onEnable() {
+		saveConfig();
 	    backupTasks = new RegionBackupTasks(this);
-		Objects.requireNonNull(getCommand("regionbackup")).setExecutor(new RegionBackupCommands(this));
+		if (getConfig().getBoolean("debug_commands")) {
+			Objects.requireNonNull(getCommand("regionbackup")).setExecutor(new RegionBackupCommands(this));
+		}
     }
 
     @Override

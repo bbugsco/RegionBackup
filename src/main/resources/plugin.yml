@@ -8,10 +8,10 @@ commands:
   regionbackup:
     description: command for debug purposes, best not to use unless necessary
     aliases:
-      - debug:forcebackup
-      - debug:clearactiveregions
-      - debug:showactiveregions
-      - debug:updateactiveregions
+      - debug_forcebackup
+      - debug_clearactiveregions
+      - debug_showactiveregions
+      - debug_updateactiveregions
     permission: regionbackup.command
     usage: /regionbackup
 permissions:

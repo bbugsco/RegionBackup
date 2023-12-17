@@ -1,0 +1,8 @@
+# Configure backup path
+backup_path: backups
+
+# Check active region interval in seconds
+check_active_regions_interval: 10
+
+# Enable debug commands
+debug_commands: false
