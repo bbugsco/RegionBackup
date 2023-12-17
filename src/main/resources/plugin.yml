@@ -2,3 +2,19 @@ name: RegionBackup
 version: '${project.version}'
 main: com.github.bbugsco.regionbackup.RegionBackup
 api-version: '1.20'
+author: bbugsco
+
+commands:
+  regionbackup:
+    description: command for debug purposes, best not to use unless necessary
+    aliases:
+      - debug:forcebackup
+      - debug:clearactiveregions
+      - debug:showactiveregions
+      - debug:updateactiveregions
+    permission: regionbackup.command
+    usage: /regionbackup
+permissions:
+  regionbackup.command:
+    default: op
+    description: allows for regionbackup command

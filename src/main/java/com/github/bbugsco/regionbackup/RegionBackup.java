@@ -2,20 +2,16 @@ package com.github.bbugsco.regionbackup;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.Objects;
+
 public final class RegionBackup extends JavaPlugin {
 
 	private RegionBackupTasks backupTasks;
 
-	/*
-	TODO:
-	 - add world to region
-	 - save world before backup
-	 - io logic
-	 */
-
     @Override
     public void onEnable() {
 	    backupTasks = new RegionBackupTasks(this);
+		Objects.requireNonNull(getCommand("regionbackup")).setExecutor(new RegionBackupCommands(this));
     }
 
     @Override
@@ -23,5 +19,8 @@ public final class RegionBackup extends JavaPlugin {
 	    backupTasks.shutdown();
     }
 
+	public RegionBackupTasks getBackupTasks() {
+		return this.backupTasks;
+	}
 
 }

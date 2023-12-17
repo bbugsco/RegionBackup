@@ -2,15 +2,14 @@ package com.github.bbugsco.regionbackup;
 
 import java.awt.*;
 import java.util.Objects;
-import java.util.UUID;
 
 public class Region extends Point {
 
-	private final UUID worldID;
+	public final String worldName;
 
-	public Region(int x, int y, UUID worldID) {
+	public Region(int x, int y, String worldName) {
 		super(x, y);
-		this.worldID = worldID;
+		this.worldName = worldName;
 	}
 
 	@Override
@@ -22,12 +21,17 @@ public class Region extends Point {
 			return false;
 		}
 		Region compareTo = (Region) obj;
-		return this.x == compareTo.x && this.y == compareTo.y && worldID == compareTo.worldID;
+		return this.x == compareTo.x && this.y == compareTo.y && Objects.equals(worldName, compareTo.worldName);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(x, y, worldID);
+		return Objects.hash(x, y, worldName);
+	}
+
+	@Override
+	public String toString() {
+		return "com.github.bbugsco.regionbackup.Region{" + "x=" + x + ", y=" + y + ", worldName=" + worldName + '}';
 	}
 
 }

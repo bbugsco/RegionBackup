@@ -1,11 +1,14 @@
 package com.github.bbugsco.regionbackup;
 
+import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 import java.io.File;
 
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -20,7 +23,6 @@ public class RegionBackupTasks {
 
 	private final ScheduledExecutorService scheduler;
 	private ArrayList<Region> activeRegions;
-	private long nextHour;
 
 	public RegionBackupTasks(RegionBackup plugin) {
 		this.plugin = plugin;
@@ -29,49 +31,71 @@ public class RegionBackupTasks {
 		activeRegions = new ArrayList<>();
 
 		long currentTimeMillis = System.currentTimeMillis();
-		nextHour = getNextHourMillis();
+		long nextHour = getNextHourMillis();
 		long initialDelay = nextHour - currentTimeMillis;
 
 		// Hourly backup task
 		this.scheduler.scheduleAtFixedRate(this::backupRegions, initialDelay, 1, TimeUnit.HOURS);
-		System.out.println("added hourly task for " + new Timestamp(currentTimeMillis + initialDelay));
 
 		// 10-second delay check player location for loaded regions
 		this.scheduler.scheduleAtFixedRate(this::updateActiveRegions, 0, 10, TimeUnit.SECONDS);
-		System.out.println("Created 10 second repeating task");
 	}
 
 	public void shutdown() {
 		this.scheduler.shutdown();
 	}
 
-	private void updateActiveRegions() {
-		for (Player player : Bukkit.getOnlinePlayers()) {
-			Region region = getRegion(player.getLocation());
-			if (!this.activeRegions.contains(region)) this.activeRegions.add(region);
-		}
+	public ArrayList<Region> getActiveRegions() {
+		return this.activeRegions;
 	}
 
-	private void backupRegions() {
-		// private String PATH = "home/bbugsco/server/backup"
-		String PATH = "/home/benhi/serverBackup";
+	public void clearActiveRegions() {
+		this.activeRegions = new ArrayList<>();
+	}
 
-		Timestamp nextHour = new Timestamp(this.nextHour);
+	public void backupRegions() {
+		String PATH = "home/bbugsco/server/backup";
+
+		Timestamp nextHour = new Timestamp(System.currentTimeMillis());
 		String formattedString = formatTimestamp(nextHour);
 
 		File outputDir = new File(PATH + "/" + formattedString);
 		boolean dirCreated = outputDir.mkdirs();
 		if (!dirCreated) plugin.getLogger().warning("Failed to create directory for backup: does the directory already exist? " + outputDir.getAbsolutePath());
 
-		// TODO here
+		for (World world : Bukkit.getWorlds()) {
+			world.save();
+		}
+
+		for (Region region : activeRegions) {
+			String regionName =  "r." + region.x + "." + region.y + ".mca";
+
+			File source = new File(region.worldName + "/region/" + regionName);
+			File destination = new File(PATH + "/" + region.worldName + "/" + regionName);
+			System.out.println("Source" + source.getAbsolutePath());
+			System.out.println("Dest" + destination.getAbsolutePath());
+
+			try {
+				FileUtils.copyFile(source, destination);
+			} catch (IOException exception) {
+				plugin.getLogger().warning("Error");
+			}
+		}
 
 		this.activeRegions = new ArrayList<>();
-		this.nextHour = getNextHourMillis();
+	}
+
+	public void updateActiveRegions() {
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			Region region = getRegion(player.getLocation());
+			if (!this.activeRegions.contains(region)) this.activeRegions.add(region);
+		}
+		System.out.println(activeRegions);
 	}
 
 	private Region getRegion(Location location) {
-		if (location.getWorld() == null) return new Region(0, 0, Bukkit.getWorlds().get(0).getUID());
-		return new Region(location.getBlockX() >> 9, location.getBlockZ() >> 9, location.getWorld().getUID());
+		if (location.getWorld() == null) return new Region(0, 0, Bukkit.getWorlds().get(0).getName());
+		return new Region(location.getBlockX() >> 9, location.getBlockZ() >> 9, location.getWorld().getName());
 	}
 
 	private static long getNextHourMillis() {
