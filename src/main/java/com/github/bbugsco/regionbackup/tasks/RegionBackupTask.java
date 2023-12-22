@@ -1,7 +1,6 @@
 package com.github.bbugsco.regionbackup.tasks;
 
 import com.github.bbugsco.regionbackup.RegionBackup;
-import org.bukkit.Bukkit;
 import java.io.File;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -36,11 +35,6 @@ public class RegionBackupTask implements Runnable {
         // Check if directory was created
         boolean dirCreated = outputDir.mkdirs();
         if (!dirCreated) plugin.getLogger().warning("Failed to create directory for backup: does the directory already exist? " + outputDir.getAbsolutePath());
-
-        // Save worlds to folder
-        for (org.bukkit.World world : Bukkit.getWorlds()) {
-            world.save();
-        }
 
         // Copy each region to the backup folder
         for (com.github.bbugsco.regionbackup.Region region : RegionBackup.activeRegions) {
