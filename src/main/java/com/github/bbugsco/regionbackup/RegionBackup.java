@@ -23,7 +23,7 @@ public final class RegionBackup extends org.bukkit.plugin.java.JavaPlugin {
         long initialDelay = nextHour - currentTimeMillis + 100;
 
         // Hourly backup task
-        Bukkit.getScheduler().runTaskTimerAsynchronously(this, new com.github.bbugsco.regionbackup.tasks.RegionBackupTask(this), initialDelay / 50, 72000); // 72000 = 3600 seconds * 20 ticks per second
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this, new com.github.bbugsco.regionbackup.tasks.RegionBackupTask(this), initialDelay / 50, 72000);
 
         // 10-second delay check player location for loaded regions
         Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new com.github.bbugsco.regionbackup.tasks.UpdateActiveRegionsTask(), 0L, getConfig().getInt("check_active_regions_interval") * 20L);
